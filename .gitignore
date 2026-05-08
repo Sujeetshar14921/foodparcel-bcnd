@@ -1,5 +1,6 @@
-node_modules
-*.env
-dist
-build
-*.log
+
+# Ignore node modules and build outputs
+node_modules/
+**/node_modules/
+dist/
+**/dist/
