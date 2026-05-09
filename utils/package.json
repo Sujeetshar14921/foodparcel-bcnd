@@ -7,7 +7,8 @@
   "scripts": {
     "build": "tsc",
     "start": "npm run build && node dist/index.js",
-    "dev": "concurrently \"tsc --watch\" \"node --watch dist/index.js\""
+    "dev": "npm run build && node dist/index.js",
+    "dev:watch": "concurrently \"tsc --watch\" \"node --watch dist/index.js\""
   },
   "keywords": [],
   "author": "",
