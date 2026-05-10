@@ -438,7 +438,7 @@ export const getCurrentOrderForRider = TryCatch(async (req, res) => {
     });
   }
 
-  const { riderId } = req.query;
+  const riderId = req.query.riderId?.toString();
 
   if (!riderId) {
     return res.status(400).json({
