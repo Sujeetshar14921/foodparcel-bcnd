@@ -308,7 +308,7 @@ export const updateOrderStatus = TryCatch(
   }
 );
 
-export const fetchOrderDetails = TryCatch(async (req, res) => {
+export const fetchOrderDetails = TryCatch(async (req: AuthenticatedRequest, res) => {
   const riderUserId = req.user?._id;
 
   if (!riderUserId) {
@@ -337,7 +337,7 @@ export const fetchOrderDetails = TryCatch(async (req, res) => {
   }
 });
 
-export const fetchDashboardSummary = TryCatch(async (req, res) => {
+export const fetchDashboardSummary = TryCatch(async (req: AuthenticatedRequest, res) => {
   const riderUserId = req.user?._id;
 
   if (!riderUserId) {
@@ -373,7 +373,7 @@ export const fetchDashboardSummary = TryCatch(async (req, res) => {
   }
 });
 
-export const rejectOrder = TryCatch(async (req, res) => {
+export const rejectOrder = TryCatch(async (req: AuthenticatedRequest, res) => {
   if (!req.user?._id) {
     return res.status(401).json({
       message: "Please Login",

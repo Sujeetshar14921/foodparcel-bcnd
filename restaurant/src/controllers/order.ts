@@ -438,7 +438,8 @@ export const getCurrentOrderForRider = TryCatch(async (req, res) => {
     });
   }
 
-  const { riderId } = req.query;
+  const rawRiderId = req.query.riderId;
+  const riderId = rawRiderId == null ? null : Array.isArray(rawRiderId) ? String(rawRiderId[0]) : String(rawRiderId);
 
   if (!riderId) {
     return res.status(400).json({
@@ -579,7 +580,8 @@ export const getRiderHistory = TryCatch(async (req, res) => {
     });
   }
 
-  const riderId = req.query.riderId?.toString();
+  const rawRiderId = req.query.riderId;
+  const riderId = rawRiderId == null ? null : Array.isArray(rawRiderId) ? String(rawRiderId[0]) : String(rawRiderId);
 
   if (!riderId) {
     return res.status(400).json({

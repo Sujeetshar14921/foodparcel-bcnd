@@ -9,6 +9,7 @@ const app = express();
 app.use(cors());
 app.use("/api/v1", adminRoutes);
 
-app.listen(process.env.PORT, () => {
-  console.log(`Admin Service is running on port ${process.env.PORT}`);
+const port = Number(process.env.PORT ?? 3000);
+app.listen(port, () => {
+  console.log(`Admin Service is running on port ${port}`);
 });
