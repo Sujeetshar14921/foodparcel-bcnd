@@ -196,7 +196,7 @@ export const acceptOrder = TryCatch(async (req: AuthenticatedRequest, res) => {
         orderId,
         riderId: rider._id.toString(),
         riderUserId: rider.userId,
-        riderName: rider.picture,
+        riderName: req.user?.name,
         riderPhone: rider.phoneNumber,
       },
       {
