@@ -36,12 +36,22 @@ export const addRiderProfile = TryCatch(
       });
     }
 
-    const { data: uploadResult } = await axios.post(
-      `${process.env.UTILS_SERVICE}/api/upload`,
-      {
-        buffer: fileBuffer.content,
-      }
-    );
+    let uploadResult;
+
+    try {
+      const { data } = await axios.post(
+        `${process.env.UTILS_SERVICE}/api/upload`,
+        {
+          buffer: fileBuffer.content,
+        }
+      );
+      uploadResult = data;
+    } catch (error: any) {
+      const status = error?.response?.status || 500;
+      const message =
+        error?.response?.data?.message || "Image upload failed";
+      return res.status(status).json({ message });
+    }
 
     const {
       phoneNumber,
@@ -196,7 +206,7 @@ export const acceptOrder = TryCatch(async (req: AuthenticatedRequest, res) => {
         orderId,
         riderId: rider._id.toString(),
         riderUserId: rider.userId,
-        riderName: rider.picture,
+        riderName: req.user?.name,
         riderPhone: rider.phoneNumber,
       },
       {
@@ -308,7 +318,7 @@ export const updateOrderStatus = TryCatch(
   }
 );
 
-export const fetchOrderDetails = TryCatch(async (req, res) => {
+export const fetchOrderDetails = TryCatch(async (req: AuthenticatedRequest, res) => {
   const riderUserId = req.user?._id;
 
   if (!riderUserId) {
@@ -337,7 +347,7 @@ export const fetchOrderDetails = TryCatch(async (req, res) => {
   }
 });
 
-export const fetchDashboardSummary = TryCatch(async (req, res) => {
+export const fetchDashboardSummary = TryCatch(async (req: AuthenticatedRequest, res) => {
   const riderUserId = req.user?._id;
 
   if (!riderUserId) {
@@ -373,7 +383,7 @@ export const fetchDashboardSummary = TryCatch(async (req, res) => {
   }
 });
 
-export const rejectOrder = TryCatch(async (req, res) => {
+export const rejectOrder = TryCatch(async (req: AuthenticatedRequest, res) => {
   if (!req.user?._id) {
     return res.status(401).json({
       message: "Please Login",

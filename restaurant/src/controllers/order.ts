@@ -26,7 +26,7 @@ export const createOrder = TryCatch(async (req: AuthenticatedRequest, res) => {
 
   const address = await Address.findOne({
     _id: addressId,
-    userId: user._id,
+    userId: user._id.toString(),
   });
 
   if (!address) {
@@ -294,8 +294,8 @@ export const updateOrderStatus = TryCatch(
       }
     );
 
-    // now assign riders as soon as the restaurant accepts the order
-    if (status === "accepted" || status === "ready_for_rider") {
+    // notify riders only when the food is actually ready for pickup
+    if (status === "ready_for_rider") {
       console.log(
         "Publishing Order ready for rider event for order",
         order._id
@@ -397,12 +397,18 @@ export const assignRiderToOrder = TryCatch(async (req, res) => {
     { new: true }
   );
 
+  if (!orderUpdated) {
+    return res.status(400).json({
+      message: "Order Already taken",
+    });
+  }
+
   await axios.post(
     `${process.env.REALTIME_SERVICE}/api/v1/internal/emit`,
     {
       event: "order:rider_assigned",
-      room: `user:${order.userId}`,
-      payload: order,
+      room: `user:${orderUpdated.userId}`,
+      payload: orderUpdated,
     },
     {
       headers: {
@@ -414,8 +420,8 @@ export const assignRiderToOrder = TryCatch(async (req, res) => {
     `${process.env.REALTIME_SERVICE}/api/v1/internal/emit`,
     {
       event: "order:rider_assigned",
-      room: `restaurant:${order.restaurantId}`,
-      payload: order,
+      room: `restaurant:${orderUpdated.restaurantId}`,
+      payload: orderUpdated,
     },
     {
       headers: {
@@ -438,7 +444,8 @@ export const getCurrentOrderForRider = TryCatch(async (req, res) => {
     });
   }
 
-  const { riderId } = req.query;
+  const rawRiderId = req.query.riderId;
+  const riderId = rawRiderId == null ? null : Array.isArray(rawRiderId) ? String(rawRiderId[0]) : String(rawRiderId);
 
   if (!riderId) {
     return res.status(400).json({
@@ -485,7 +492,7 @@ export const updateOrderStatusRider = TryCatch(async (req, res) => {
     await axios.post(
       `${process.env.REALTIME_SERVICE}/api/v1/internal/emit`,
       {
-        event: "order:rider_assigned",
+        event: "order:update",
         room: `restaurant:${order.restaurantId}`,
         payload: order,
       },
@@ -499,7 +506,7 @@ export const updateOrderStatusRider = TryCatch(async (req, res) => {
     await axios.post(
       `${process.env.REALTIME_SERVICE}/api/v1/internal/emit`,
       {
-        event: "order:rider_assigned",
+        event: "order:update",
         room: `user:${order.userId}`,
         payload: order,
       },
@@ -523,7 +530,7 @@ export const updateOrderStatusRider = TryCatch(async (req, res) => {
     await axios.post(
       `${process.env.REALTIME_SERVICE}/api/v1/internal/emit`,
       {
-        event: "order:rider_assigned",
+        event: "order:update",
         room: `restaurant:${order.restaurantId}`,
         payload: order,
       },
@@ -537,7 +544,7 @@ export const updateOrderStatusRider = TryCatch(async (req, res) => {
     await axios.post(
       `${process.env.REALTIME_SERVICE}/api/v1/internal/emit`,
       {
-        event: "order:rider_assigned",
+        event: "order:update",
         room: `user:${order.userId}`,
         payload: order,
       },
@@ -579,7 +586,8 @@ export const getRiderHistory = TryCatch(async (req, res) => {
     });
   }
 
-  const riderId = req.query.riderId?.toString();
+  const rawRiderId = req.query.riderId;
+  const riderId = rawRiderId == null ? null : Array.isArray(rawRiderId) ? String(rawRiderId[0]) : String(rawRiderId);
 
   if (!riderId) {
     return res.status(400).json({
