@@ -49,12 +49,22 @@ export const addRestraunt = TryCatch(async (req: AuthenticatedRequest, res) => {
     });
   }
 
-  const { data: uploadResult } = await axios.post(
-    `${process.env.UTILS_SERVICE}/api/upload`,
-    {
-      buffer: fileBuffer.content,
-    }
-  );
+  let uploadResult;
+
+  try {
+    const { data } = await axios.post(
+      `${process.env.UTILS_SERVICE}/api/upload`,
+      {
+        buffer: fileBuffer.content,
+      }
+    );
+    uploadResult = data;
+  } catch (error: any) {
+    const status = error?.response?.status || 500;
+    const message =
+      error?.response?.data?.message || "Image upload failed";
+    return res.status(status).json({ message });
+  }
 
   const restaurant = await Restaurant.create({
     name,

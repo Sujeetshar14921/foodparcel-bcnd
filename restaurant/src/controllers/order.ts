@@ -397,12 +397,18 @@ export const assignRiderToOrder = TryCatch(async (req, res) => {
     { new: true }
   );
 
+  if (!orderUpdated) {
+    return res.status(400).json({
+      message: "Order Already taken",
+    });
+  }
+
   await axios.post(
     `${process.env.REALTIME_SERVICE}/api/v1/internal/emit`,
     {
       event: "order:rider_assigned",
-      room: `user:${order.userId}`,
-      payload: order,
+      room: `user:${orderUpdated.userId}`,
+      payload: orderUpdated,
     },
     {
       headers: {
@@ -414,8 +420,8 @@ export const assignRiderToOrder = TryCatch(async (req, res) => {
     `${process.env.REALTIME_SERVICE}/api/v1/internal/emit`,
     {
       event: "order:rider_assigned",
-      room: `restaurant:${order.restaurantId}`,
-      payload: order,
+      room: `restaurant:${orderUpdated.restaurantId}`,
+      payload: orderUpdated,
     },
     {
       headers: {
