@@ -26,7 +26,7 @@ export const createOrder = TryCatch(async (req: AuthenticatedRequest, res) => {
 
   const address = await Address.findOne({
     _id: addressId,
-    userId: user._id,
+    userId: user._id.toString(),
   });
 
   if (!address) {
@@ -294,8 +294,8 @@ export const updateOrderStatus = TryCatch(
       }
     );
 
-    // now assign riders as soon as the restaurant accepts the order
-    if (status === "accepted" || status === "ready_for_rider") {
+    // notify riders only when the food is actually ready for pickup
+    if (status === "ready_for_rider") {
       console.log(
         "Publishing Order ready for rider event for order",
         order._id
@@ -486,7 +486,7 @@ export const updateOrderStatusRider = TryCatch(async (req, res) => {
     await axios.post(
       `${process.env.REALTIME_SERVICE}/api/v1/internal/emit`,
       {
-        event: "order:rider_assigned",
+        event: "order:update",
         room: `restaurant:${order.restaurantId}`,
         payload: order,
       },
@@ -500,7 +500,7 @@ export const updateOrderStatusRider = TryCatch(async (req, res) => {
     await axios.post(
       `${process.env.REALTIME_SERVICE}/api/v1/internal/emit`,
       {
-        event: "order:rider_assigned",
+        event: "order:update",
         room: `user:${order.userId}`,
         payload: order,
       },
@@ -524,7 +524,7 @@ export const updateOrderStatusRider = TryCatch(async (req, res) => {
     await axios.post(
       `${process.env.REALTIME_SERVICE}/api/v1/internal/emit`,
       {
-        event: "order:rider_assigned",
+        event: "order:update",
         room: `restaurant:${order.restaurantId}`,
         payload: order,
       },
@@ -538,7 +538,7 @@ export const updateOrderStatusRider = TryCatch(async (req, res) => {
     await axios.post(
       `${process.env.REALTIME_SERVICE}/api/v1/internal/emit`,
       {
-        event: "order:rider_assigned",
+        event: "order:update",
         room: `user:${order.userId}`,
         payload: order,
       },
